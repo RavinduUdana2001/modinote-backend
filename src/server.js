@@ -1,4 +1,5 @@
 const express = require("express");
+const dns = require("dns");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -10,6 +11,8 @@ const profileRoutes = require("./routes/profile.routes");
 const settingsRoutes = require("./routes/settings.routes");
 const errorHandler = require("./middleware/error.middleware");
 const { uploadsDir } = require("./config/uploads");
+
+dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 app.set("trust proxy", 1);
