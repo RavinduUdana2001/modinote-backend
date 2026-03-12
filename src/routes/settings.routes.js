@@ -19,7 +19,7 @@ router.put("/change-password", auth, async (req, res) => {
 
     if (String(newPassword).length < 8) {
       return res.status(400).json({
-        message: "New password must be at least 8 characters.",
+        message: "New password must be at least 8 characters. Use letters and numbers.",
       });
     }
 

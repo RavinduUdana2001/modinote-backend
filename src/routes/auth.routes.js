@@ -34,9 +34,9 @@ router.post("/signup", async (req, res) => {
     }
 
     if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 8 characters." });
+      return res.status(400).json({
+        message: "Password must be at least 8 characters. Use letters and numbers.",
+      });
     }
 
     const emailLower = email.toLowerCase().trim();
@@ -502,7 +502,9 @@ router.post("/reset-password", async (req, res) => {
     }
 
     if (String(newPassword).length < 8) {
-      return res.status(400).json({ message: "Password must be at least 8 characters." });
+      return res.status(400).json({
+        message: "Password must be at least 8 characters. Use letters and numbers.",
+      });
     }
 
     const emailLower = email.toLowerCase().trim();
