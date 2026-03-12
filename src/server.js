@@ -12,6 +12,7 @@ const errorHandler = require("./middleware/error.middleware");
 const { uploadsDir } = require("./config/uploads");
 
 const app = express();
+app.set("trust proxy", 1);
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")

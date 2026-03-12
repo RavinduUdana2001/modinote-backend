@@ -51,7 +51,12 @@ router.post("/signup", async (req, res) => {
         return res.status(409).json({ message: "Email already registered." });
       }
 
-      await createAndSendOtp(user.id, emailLower);
+      try {
+        await createAndSendOtp(user.id, emailLower);
+      } catch (mailErr) {
+        console.error("OTP send failed:", mailErr);
+        return res.status(500).json({ message: "Failed to send OTP email. Please try again." });
+      }
       return res.status(200).json({ message: "OTP resent to your email." });
     }
 
@@ -85,7 +90,12 @@ router.post("/signup", async (req, res) => {
         ]
       );
 
-      await createAndSendPendingOtp(pendingId, emailLower);
+      try {
+        await createAndSendPendingOtp(pendingId, emailLower);
+      } catch (mailErr) {
+        console.error("Pending OTP send failed:", mailErr);
+        return res.status(500).json({ message: "Failed to send OTP email. Please try again." });
+      }
 
       return res.status(200).json({
         message: "OTP resent to your email",
@@ -107,7 +117,12 @@ router.post("/signup", async (req, res) => {
 
     const pendingUser = result.rows[0];
 
-    await createAndSendPendingOtp(pendingUser.id, pendingUser.email);
+    try {
+      await createAndSendPendingOtp(pendingUser.id, pendingUser.email);
+    } catch (mailErr) {
+      console.error("Pending OTP send failed:", mailErr);
+      return res.status(500).json({ message: "Failed to send OTP email. Please try again." });
+    }
 
     return res.status(201).json({
       message: "OTP sent to your email",
@@ -326,7 +341,12 @@ router.post("/resend-otp", async (req, res) => {
         return res.json({ message: "Email already verified." });
       }
 
-      await createAndSendOtp(user.id, emailLower);
+      try {
+        await createAndSendOtp(user.id, emailLower);
+      } catch (mailErr) {
+        console.error("OTP resend failed:", mailErr);
+        return res.status(500).json({ message: "Failed to send OTP email. Please try again." });
+      }
       return res.json({ message: "OTP resent." });
     }
 
@@ -339,7 +359,12 @@ router.post("/resend-otp", async (req, res) => {
       return res.json({ message: "If the email exists, OTP was sent." });
     }
 
-    await createAndSendPendingOtp(pendingRes.rows[0].id, emailLower);
+    try {
+      await createAndSendPendingOtp(pendingRes.rows[0].id, emailLower);
+    } catch (mailErr) {
+      console.error("Pending OTP resend failed:", mailErr);
+      return res.status(500).json({ message: "Failed to send OTP email. Please try again." });
+    }
     return res.json({ message: "OTP resent." });
   } catch (err) {
     console.error(err);
