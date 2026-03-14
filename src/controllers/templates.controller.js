@@ -22,6 +22,18 @@ function buildPreviewText(contentJson) {
     .join(", ");
 }
 
+function sanitizeTemplateContent(contentJson) {
+  return {
+    ...contentJson,
+    sections: contentJson.sections.map((section) => ({
+      key: section.key,
+      label: section.label,
+      enabled: section.enabled !== false,
+      inputType: section.inputType || "textarea",
+    })),
+  };
+}
+
 async function getTemplates(req, res, next) {
   try {
     const userId = req.user.userId;
@@ -80,14 +92,15 @@ async function createTemplate(req, res, next) {
       });
     }
 
-    const previewText = buildPreviewText(contentJson);
+    const sanitizedContent = sanitizeTemplateContent(contentJson);
+    const previewText = buildPreviewText(sanitizedContent);
 
     const created = await templatesService.createCustomTemplate({
       userId,
       name: name.trim(),
       description: description?.trim() || null,
       category: category?.trim() || "general",
-      contentJson,
+      contentJson: sanitizedContent,
       previewText,
     });
 
@@ -141,7 +154,8 @@ async function updateTemplate(req, res, next) {
       });
     }
 
-    const previewText = buildPreviewText(contentJson);
+    const sanitizedContent = sanitizeTemplateContent(contentJson);
+    const previewText = buildPreviewText(sanitizedContent);
 
     const updated = await templatesService.updateCustomTemplate({
       templateId: id,
@@ -149,7 +163,7 @@ async function updateTemplate(req, res, next) {
       name: name.trim(),
       description: description?.trim() || null,
       category: category?.trim() || "general",
-      contentJson,
+      contentJson: sanitizedContent,
       previewText,
     });
 

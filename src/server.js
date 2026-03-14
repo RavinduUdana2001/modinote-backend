@@ -1,14 +1,21 @@
 const express = require("express");
 const dns = require("dns");
+const path = require("path");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+
+const envPath = path.resolve(__dirname, "../.env");
+process.env.APP_ENV_PATH = envPath;
+dotenv.config({ path: envPath });
 
 const authRoutes = require("./routes/auth.routes");
 const templatesRoutes = require("./routes/templates.routes");
 const profileRoutes = require("./routes/profile.routes");
 const settingsRoutes = require("./routes/settings.routes");
+const voiceRoutes = require("./routes/voice.routes");
 const errorHandler = require("./middleware/error.middleware");
 const { uploadsDir } = require("./config/uploads");
 
@@ -63,6 +70,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/templates", templatesRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/voice", voiceRoutes);
 
 app.use(errorHandler);
 
@@ -71,4 +79,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Uploads directory: ${uploadsDir}`);
+  console.log(`Environment file: ${envPath}`);
 });

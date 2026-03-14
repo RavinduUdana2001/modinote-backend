@@ -209,20 +209,50 @@ async function updateCustomTemplate({
 }
 
 async function deleteCustomTemplate(templateId, userId) {
-  const query = `
-    UPDATE templates
-    SET
-      is_active = false,
-      updated_by = $2
-    WHERE id = $1
-      AND owner_user_id = $2
-      AND visibility = 'private'
-      AND is_active = true
-    RETURNING id
-  `;
+  const client = await pool.connect();
 
-  const result = await pool.query(query, [templateId, userId]);
-  return result.rows[0] || null;
+  try {
+    await client.query("BEGIN");
+
+    const query = `
+      UPDATE templates
+      SET
+        is_active = false,
+        updated_by = $2
+      WHERE id = $1
+        AND owner_user_id = $2
+        AND visibility = 'private'
+        AND is_active = true
+      RETURNING id
+    `;
+
+    const result = await client.query(query, [templateId, userId]);
+
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    await client.query(
+      `
+      UPDATE user_template_preferences
+      SET
+        default_template_id = NULL,
+        updated_at = NOW()
+      WHERE user_id = $1
+        AND default_template_id = $2
+      `,
+      [userId, templateId]
+    );
+
+    await client.query("COMMIT");
+    return result.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 async function setDefaultTemplate(userId, templateId) {
